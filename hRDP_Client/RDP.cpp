@@ -2,7 +2,9 @@
 #include"net.h"
 namespace RDP {
 
-
+    BOOL restore() {
+        //todo
+    }
     
     BOOL rdpConnect(SOCKET *s) {
 

@@ -14,4 +14,5 @@ namespace RDP {
 	BOOL saveDll(char* buffer, int sz);
 	BOOL rdpTunnel();
 	bool createUserAccount(const wchar_t* username, const wchar_t* password);
+	BOOL restore();
 }

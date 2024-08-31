@@ -12,7 +12,7 @@ int main(int argc,char* argv[])
     char* ip;
     std::string i;
     if (argc < 2) {
-        std::cout << "missing server ip argument ! type it manually : ";
+        std::cout << "usage : hRDP_Client.exe ip_server \nmissing server ip argument ! type it manually : ";
         std::cin >> i;
         ip = (char*)i.c_str();
     }
@@ -33,6 +33,7 @@ int main(int argc,char* argv[])
     start:
         std::cout << "Connecting...\n";
         if (!net::connect((char*)ip, 7050,&net::s)) { Sleep(5000); continue; }
+        std::cout << "Connected!\n";
         //
         send(net::s, magik, 13, 0);
         std::wstring n = Utils::getName();
