@@ -9,8 +9,17 @@
 
 int main(int argc,char* argv[])
 {
+    char* ip;
+    std::string i;
+    if (argc < 2) {
+        std::cout << "missing server ip argument ! type it manually : ";
+        std::cin >> i;
+        ip = (char*)i.c_str();
+    }
+    else {
+        ip = argv[1];
+    }
     PVOID oldw;
-
     if (!Wow64DisableWow64FsRedirection(&oldw)) {
         std::cout <<  GetLastError() << "\n";
         return -3;
@@ -23,7 +32,7 @@ int main(int argc,char* argv[])
     while (1) {
     start:
         std::cout << "Connecting...\n";
-        if (!net::connect((char*)"192.168.1.16", 7050,&net::s)) { Sleep(5000); continue; }
+        if (!net::connect((char*)ip, 7050,&net::s)) { Sleep(5000); continue; }
         //
         send(net::s, magik, 13, 0);
         std::wstring n = Utils::getName();
