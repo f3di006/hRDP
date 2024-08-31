@@ -64,6 +64,10 @@ namespace ClientProc {
 		return FALSE;
 	}
 
+	void EndProc(SOCKET s) {
+		std::cout << "Client disconnected !\n"; closesocket(s); Sleep(5000);
+		ExitProcess(0);
+	}
     void ClientStart(SOCKET client) {
 
 		if (!verifyClient(client)) { closesocket(client); ExitProcess(0); }
@@ -71,7 +75,7 @@ namespace ClientProc {
 		if (buffer == NULL) { std::cout << "ERROR malloc\n"; Sleep(5000); ExitProcess(-5); }
 		int p_sz;
 		while (1) {
-			if (net::recvp(client, buffer, MAXPACK, &p_sz) == FALSE) { std::cout << "Client disconnected !\n"; closesocket(client); Sleep(5000); break; }
+			if (net::recvp(client, buffer, MAXPACK, &p_sz) == FALSE) { EndProc(client); }
 			switch (buffer[0])
 			{
 			case 0x02:
@@ -80,16 +84,14 @@ namespace ClientProc {
 				std::cout << "[+] Version : " << Config::Ver << "\n";
 				Patcher::prepKeys();
 				Patcher::startPatch((BYTE*)&buffer[1], p_sz);
-				if (net::DllSend(client, &buffer[1], p_sz) == SOCKET_ERROR) { break; }
+				if (net::DllSend(client, &buffer[1], p_sz) == SOCKET_ERROR) { EndProc(client); }
 				break;
 			case 0x04:
 				printf("\tClient Log : %ls\n", (wchar_t*)&buffer[1]);
 				break;
 			case 0x03:
 				net::RDPServer(client);
-				std::cout << "Client Disconnected !";
-				Sleep(5000);
-				ExitProcess(0);
+				EndProc(client);
 				break;
 			case 0x09:
 				std::cout << "error connecting to RDP , this version may not be supported . Exit...\n";
